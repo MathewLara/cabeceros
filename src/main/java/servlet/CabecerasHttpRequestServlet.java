@@ -1,12 +1,6 @@
 package servlet;
 
-/*
-Autor: Mathew Lara
-Fecha: 05/11/2025
-Descripcion: Este servlet maneja peticiones GET para obtener y mostrar
-             todas las cabeceras (headers) de la solicitud HTTP
-             que envía el navegador del cliente.
-*/
+
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,22 +11,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
-
+/*
+Autor: Mathew Lara
+Fecha: 05/11/2025 version 2.0
+Descripcion: Este servlet maneja peticiones GET para obtener y mostrar
+             todas las cabeceras (headers) de la solicitud HTTP
+             que envía el navegador del cliente.
+*/
 // La anotación @WebServlet mapea este servlet a la URL "/cabeceros-request"
 // Cualquier solicitud a esa ruta será manejada por esta clase.
 @WebServlet("/cabeceros-request")
 public class CabecerasHttpRequestServlet extends HttpServlet {
 
-    /**
-     * Maneja las solicitudes HTTP por el metodo GET.
-     *
-     * @param req  El objeto HttpServletRequest que contiene la solicitud del cliente
-     * (incluyendo las cabeceras).
-     * @param resp El objeto HttpServletResponse que se usará para enviar la respuesta
-     * al cliente.
-     * @throws ServletException Si ocurre un error específico del servlet.
-     * @throws IOException      Si ocurre un error de entrada/salida.
-     */
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
@@ -41,7 +32,7 @@ public class CabecerasHttpRequestServlet extends HttpServlet {
         resp.setContentType("text/html;charset=UTF-8");
 
         // 2. Obtener información de la solicitud (request)
-        String metodoHttp = req.getMethod(); // Obtiene el método (GET, POST, etc.)
+        String metodoHttp = req.getMethod(); // Obtiene el metodo (GET, POST, etc.)
         String requestURI = req.getRequestURI(); // Obtiene la URI (parte de la URL después del host)
         String requestURL = req.getRequestURL().toString(); // Obtiene la URL completa
         String contextPath = req.getContextPath(); // Obtiene la ruta de la aplicación (ej: /cabeceros)
