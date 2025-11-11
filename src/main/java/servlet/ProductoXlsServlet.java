@@ -2,6 +2,8 @@ package servlet;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+// Import necesario para la clase Cookie
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,14 +13,20 @@ import service.ProductoServiceImplement;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+// Import necesario para usar Arrays.stream()
+import java.util.Arrays;
 import java.util.List;
+// Import necesario para la clase Optional
+import java.util.Optional;
+
 /*
  * autor: Mathew Lara
- * fecha y version: 06/11/2025 version: 1.0
+ * fecha y version: 10/11/2025 version: 2.0
  * descripcion: Servlet con doble propósito. Responde en dos rutas:
  * 1. "/productos.html": Muestra una tabla HTML con los productos.
+ * (Con lógica de cookies para ocultar/mostrar precios).
  * 2. "/productos.xls": Genera un archivo Excel (XLS) para descargar
- * con esos mismos productos.
+ * (También con lógica de cookies).
  */
 @WebServlet ({"/productos.xls","/productos.html"})
 public class ProductoXlsServlet extends HttpServlet {
@@ -32,27 +40,45 @@ public class ProductoXlsServlet extends HttpServlet {
         // 1. Obtener la lista de productos desde el servicio
         ProductoService service = new ProductoServiceImplement();
         List<Producto> productos = service.listar();
+        // 2. Obtener y verificar la cookie de la sesion
+        // Obtener todas las cookies que el navegador envió en la solicitud.
+        // req.getCookies() puede devolver 'null' si el navegador no envía ninguna.
+        // Si es 'null', creamos un array de Cookie vacío (new Cookie[0]).
+        // Si NO es 'null', usamos el array de cookies devuelto.
+        Cookie[] cookies = req.getCookies() != null ? req.getCookies() : new Cookie[0];
 
-        // 2. Determinar qué tipo de respuesta quiere el cliente (HTML o Excel)
-        // Si no, se configuran las cabeceras para HTML
+        // Buscar la cookie "username" usando un Stream de Java.
+        // Convertimos el array 'cookies' en un Stream para usar métodos funcionales.
+        Optional<String> cookieOptional = Arrays.stream(cookies)
+                // Filtrar: Nos quedamos solo con la cookie cuyo nombre ("getName()")
+                // sea exactamente "username".
+                .filter(c -> "username".equals(c.getName()))
+                // Mapear: De la cookie filtrada, extraemos solo su valor ("getValue()").
+                .map(Cookie::getValue)
+                // Buscar: Tomamos el primer (y único) valor que haya coincidido.
+                .findAny();
+
+        // 'cookieOptional' es ahora un contenedor.
+        // - Si se encontró la cookie "username", cookieOptional.isPresent() será 'true'.
+        // - Si no se encontró, cookieOptional.isPresent() será 'false'.
+
+
+        // 3. Determinar qué tipo de respuesta quiere el cliente (HTML o Excel)
         resp.setContentType("text/html;charset=UTF-8");
-        // Se obtiene la ruta del servlet (ej: /productos.xls)
         String servletPath=req.getServletPath();
-        // Se comprueba si la ruta termina en .xls
         boolean esXls=servletPath.endsWith(".xls");
 
-        // 3. Configurar las cabeceras (headers) de la respuesta
+        // 4. Configurar las cabeceras (headers) de la respuesta
         if (esXls){
-            // Si es Excel, se configuran las cabeceras para Excel
             resp.setContentType("application/vnd.ms-excel");
-            // Se fuerza la descarga con un nombre de archivo
             resp.setHeader("Content-Disposition", "attachment; filename=productos.xls");
         }
-        // 4. Escribir el cuerpo de la respuesta (HTML o la tabla para Excel)
+
+        // 5. Escribir el cuerpo de la respuesta (HTML o la tabla para Excel)
         try (PrintWriter out = resp.getWriter()) {
             // Si NO es Excel, se escribe la cabecera HTML y los enlaces
             if (!esXls) {
-                //Creo la plantilla html
+                //(código de la plantilla HTML: <html>, <head>, <body>, <h1>, etc.)
                 out.print("<!DOCTYPE html>");
                 out.println("<html>");
                 out.println("<head>");
@@ -61,9 +87,7 @@ public class ProductoXlsServlet extends HttpServlet {
                 out.println("</head>");
                 out.println("<body>");
                 out.println("<h1>Listado de productos</h1>");
-                // Enlace para descargar el Excel (apunta a este mismo servlet pero con .xls)
                 out.println("<p><a href=\"" + req.getContextPath() + "/productos.xls" + "\">exportar a excel</a></p>");
-                // Enlace para descargar el JSON (apunta al otro servlet)
                 out.println("<p><a href=\"" + req.getContextPath() + "/productojson" + "\">mostrar json</a></p>");
             }
 
@@ -74,13 +98,29 @@ public class ProductoXlsServlet extends HttpServlet {
             out.println("<th>tipo</th>");
             out.println("<th>precio</th>");
             out.println("</tr>");
-            // Si NO es Excel, se cierran las etiquetas HTML
+
+            // 6. Recorre los productos y los muestra en la lista
+            // Iteramos sobre la lista de productos. 'p' es cada objeto Producto.
             productos.forEach(p->{
                 out.println("<tr>");
                 out.println("<td>"+p.getId()+"</td>");
                 out.println("<td>"+p.getNombre()+"</td>");
                 out.println("<td>"+p.getTipo()+"</td>");
-                out.println("<td>"+p.getPrecio()+"</td>");
+
+                // 7. Logica del cookie
+                // Aquí usamos la variable 'cookieOptional' que definimos en el 2.
+                // se pregunta si está presente el valor de la cookie
+                // (Es decir, ¿el usuario SÍ inició sesión?).
+                if (cookieOptional.isPresent()) {
+                    // Si hay sesión: El usuario está logueado.
+                    // Imprimimos la celda (<td>) con el precio real del producto.
+                    out.println("<td>"+p.getPrecio()+"</td>");
+                } else {
+                    // Si no hay sesión: El usuario no está logueado.
+                    // Imprimimos la celda (<td>) con un mensaje indicando
+                    // que debe iniciar sesión.
+                    out.println("<td>--- Inicie sesión para ver ---</td>");
+                }
                 out.println("</tr>");
             });
             out.println("</table>");

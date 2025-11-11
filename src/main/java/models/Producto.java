@@ -2,7 +2,7 @@ package models;
 /*
  * autor: Mathew Lara
  * fecha y version: 06/11/2025 version: 1.0
- * descripcion: Clase que modela un Producto (POJO - Plain Old Java Object).
+ * descripcion: Clase que modela un Producto
  * Contiene los atributos de un producto (id, nombre, tipo, precio),
  * constructores para crear instancias, y sus metodos getters y setters
  * para acceder y modificar los atributos.
@@ -56,7 +56,6 @@ public class Producto {
     public String getNombre() {
         return nombre;
     }
-
     /*
      * Metodo para establecer el nombre del producto.
      * El parametro nombre define el nombre a establecer.
