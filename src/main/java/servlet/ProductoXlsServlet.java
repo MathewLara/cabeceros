@@ -32,8 +32,8 @@ import java.util.Optional;
 public class ProductoXlsServlet extends HttpServlet {
     /*
      * Metodo que maneja las solicitudes HTTP GET.
-     * El parametro req define la solicitud del cliente (HttpServletRequest).
-     * El parametro resp define la respuesta al cliente (HttpServletResponse).
+     * El parametro req define la solicitud del cliente (HttpServletRequest)
+     * El parametro resp define la respuesta al cliente (HttpServletResponse)
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

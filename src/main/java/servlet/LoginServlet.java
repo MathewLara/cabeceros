@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Optional;
 import static java.lang.System.out;
-
 /*
  * autor: Mathew Lara
  * fecha y version: 10/11/2025 version: 1.0
