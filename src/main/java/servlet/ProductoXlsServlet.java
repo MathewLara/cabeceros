@@ -55,7 +55,7 @@ public class ProductoXlsServlet extends HttpServlet {
                 .filter(c -> "username".equals(c.getName()))
                 // Mapear: De la cookie filtrada, extraemos solo su valor ("getValue()").
                 .map(Cookie::getValue)
-                // Buscar: Tomamos el primer (y único) valor que haya coincidido.
+                // Buscar: Tomamos el primer valor que haya coincidido.
                 .findAny();
 
         // 'cookieOptional' es ahora un contenedor.

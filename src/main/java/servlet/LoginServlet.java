@@ -54,7 +54,7 @@ public class LoginServlet extends HttpServlet {
                 // Tomamos la primera que encuentre
                 .findAny();
         // 'cookieOptional' es un 'Optional', un contenedor que puede tener
-        // un valor (si se encontró la cookie) o estar vacío (si no se encontró).
+        // un valor (si se encontró la cookie) o estar vacío
 
         // 4. Lógica de decisión
         if (cookieOptional.isPresent()) {
