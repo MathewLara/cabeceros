@@ -1,5 +1,146 @@
-.username{
-    color: #ff0000;
+/* --- Estilos Generales --- */
+/* Se aplica a toda la página */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* Fuentes modernas */
+    background-color: #f0f2f5; /* Un gris muy claro para el fondo */
+    color: #333; /* Color de texto principal (gris oscuro) */
+    margin: 0;
+    padding: 20px;
+}
+
+/* --- Estilos para el Menú (index.html) --- */
+/* Afecta a la lista (<ul>) del menú */
+.nav-menu {
+    list-style: none; /* Quita los puntos de la lista */
+    padding: 0;
+    width: 100%;
+    margin-top: 30px;
+}
+
+.nav-menu li {
+    margin-bottom: 10px; /* Espacio entre botones */
+}
+
+/* Afecta a los enlaces (<a>) dentro del menú */
+.nav-menu a {
+    display: block; /* Hace que el link ocupe todo el ancho del <li> */
+    padding: 15px; /* Relleno interno para hacerlo "grande" */
+    background-color: #ffffff;
+    color: #007bff; /* Color de texto azul */
+    text-decoration: none; /* Quita el subrayado */
+    font-weight: bold;
+    border-radius: 8px; /* Bordes redondeados */
+    border: 1px solid #ddd;
+    text-align: center;
+    transition: all 0.2s ease; /* Animación suave al pasar el mouse */
+}
+
+/* Efecto al pasar el mouse (hover) sobre un enlace del menú */
+.nav-menu a:hover {
+    background-color: #007bff; /* Fondo azul */
+    color: #ffffff; /* Texto blanco */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombra sutil */
+}
+
+/* --- Estilos para Títulos y Texto --- */
+h1 {
+    color: #2c3e50; /* Un color azul/gris oscuro */
+    border-bottom: 2px solid #e0e0e0; /* Línea de separación inferior */
+    padding-bottom: 10px;
+}
+
+/* Esta es tu clase: Se aplica al <span> del "admin" */
+.username {
+    color: #ff0000; /* Color rojo (¡puedes cambiarlo a #007bff si quieres azul!) */
     font-weight: bold;
 }
 
+/* --- Estilos para la Tabla (Productos) --- */
+table {
+    width: 100%; /* La tabla ocupa todo el ancho */
+    border-collapse: collapse; /* Une los bordes de las celdas (muy importante) */
+    margin-top: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra sutil */
+    border-radius: 8px; /* Bordes redondeados para la tabla */
+    overflow: hidden; /* Asegura que los bordes redondeados se vean bien */
+}
+
+/* Celdas de encabezado (th) y celdas de datos (td) */
+th, td {
+    padding: 12px 15px; /* Relleno interno */
+    border-bottom: 1px solid #ddd; /* Solo bordes horizontales para un look limpio */
+    text-align: left; /* Alinea el texto a la izquierda */
+}
+
+/* Solo los encabezados (th) */
+th {
+    background-color: #f8f8f8; /* Fondo gris claro para el encabezado */
+    font-weight: bold;
+}
+
+/* Efecto "Zebra": Colorea las filas pares */
+tr:nth-child(even) {
+    background-color: #fdfdfd; /* Un blanco apenas más oscuro */
+}
+
+/* Efecto "Hover": Cambia el color de la fila al pasar el mouse */
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* --- Estilos para el Formulario (login.jsp) --- */
+
+/* Un contenedor "tarjeta" para el formulario */
+.login-container {
+    width: 100%;
+    max-width: 400px; /* Ancho máximo del formulario */
+    margin: 50px auto; /* Centra el formulario vertical y horizontalmente */
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-sizing: border-box; /* Evita que el padding afecte el ancho total */
+}
+
+/* Contenedor de cada campo (<div>) */
+.login-container div {
+    margin-bottom: 15px; /* Espacio entre cada campo (user, pass, botón) */
+}
+
+/* Etiquetas (Label) */
+.login-container label {
+    display: block; /* Pone el label en su propia línea, encima del campo */
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+/* Campos de texto y password */
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Asegura que el padding no rompa el ancho */
+}
+
+/* Botón de Enviar (submit) */
+.login-container input[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff; /* Azul */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer; /* Cambia el cursor a una "manito" */
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.2s; /* Animación suave */
+}
+
+/* Efecto "Hover" para el botón */
+.login-container input[type="submit"]:hover {
+    background-color: #0056b3; /* Un azul más oscuro */
+}

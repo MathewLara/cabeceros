@@ -2,138 +2,146 @@ package servlet;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
+import service.LoginService;
+import service.LoginServiceImplement;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Optional;
-import static java.lang.System.out;
+
 /*
  * autor: Mathew Lara
- * fecha y version: 10/11/2025 version: 1.0
- * descripcion: Servlet que maneja el inicio de sesión de usuario.
- * Responde a las rutas "/login" y "/login.html".
- * - doGet: Verifica si el usuario ya inició sesión (revisando la cookie).
- * - Si ya tiene cookie: Muestra un mensaje de "ya estás logueado".
- * - Si no tiene cookie: Muestra el formulario JSP para iniciar sesión.
- * - doPost: Procesa los datos del formulario de login.
- * - Si el login es correcto: Crea una cookie "username" y redirige al inicio.
- * - Si el login es incorrecto: Envía un error 401.
+ * fecha y version: 11/11/2025 version: 2.0
+ * descripcion: Servlet que maneja el inicio de sesión.
+ * - Toda la lógica de sesión se maneja con HttpSession (username y contador).
+ * - doGet: Verifica si existe una sesión activa (usando LoginService).
+ * - Si existe: Muestra bienvenida y el contador de inicios de sesión.
+ * - Si no existe: Muestra el formulario login.jsp.
+ *
+ * - doPost: Valida las credenciales.
+ * - Si son correctas: Crea la sesión, guarda "username" y actualiza
+ * el "sessionCounter" dentro de la sesión.
+ * - Si son incorrectas: Envía error 401.
  */
-@WebServlet({"/login","/login.html"})
+@WebServlet({"/login", "/login.html"})
 public class LoginServlet extends HttpServlet {
 
-    // 1. Credenciales de acceso
-    // Se definen como 'final static' para que sean constantes de la clase.
+    // --- Credenciales de acceso (constantes) ---
     final static String USERNAME = "admin";
     final static String PASSWORD = "12345";
 
     /*
-     * Metodo que maneja las solicitudes HTTP GET.
-     * Se activa cuando el usuario navega a /login.html
-     * Su objetivo es verificar si el usuario ya tiene una sesión activa.
+     * Metodo GET: Maneja la navegación a la página de login.
+     * Su objetivo es mostrar el formulario o la bienvenida si ya hay sesión.
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        // 2. Obtener las cookies que envía el navegador
-        // req.getCookies() puede devolver 'null' si no hay cookies.
-        // Este ternario lo protege: si es 'null', crea un array vacío para evitar errores.
-        Cookie[] cookies = req.getCookies() != null ? req.getCookies() : new Cookie[0];
+        // 1. Usamos el Servicio para ver si ya hay un "username" en la sesión
+        LoginService auth = new LoginServiceImplement();
+        Optional<String> usernameOptional = auth.getUsername(req);
 
-        // 3. Buscar la cookie específica de "username"
-        // Usamos un Stream de Java 8 para procesar la lista de cookies.
-        Optional<String> cookieOptional = Arrays.stream(cookies)
-                // Filtramos para encontrar solo la cookie llamada "username"
-                .filter(c -> "username".equals(c.getName()))
-                // Convertimos la Cookie (objeto) a su valor (String)
-                .map(Cookie::getValue)
-                // Tomamos la primera que encuentre
-                .findAny();
-        // 'cookieOptional' es un 'Optional', un contenedor que puede tener
-        // un valor (si se encontró la cookie) o estar vacío
+        // 2. Lógica de decisión: ¿Existe el username en la sesión?
+        if (usernameOptional.isPresent()) {
+            // 2a. Sí hay sesión: El usuario ya está logueado.
 
-        // 4. Lógica de decisión
-        if (cookieOptional.isPresent()) {
-            // Si encontramos la cookie (Usuario ya logueado)
-            // Mostramos un mensaje de bienvenida, no el formulario.
+            // Obtenemos la sesión (sabemos que existe)
+            HttpSession session = req.getSession();
+
+            // Leemos el contador de la sesión
+            Integer counter = (Integer) session.getAttribute("sessionCounter");
+            if (counter == null) {
+                counter = 0; // Seguridad por si algo falla
+            }
+
+            // Lógica simple para "vez" o "veces"
+            String veces = (counter == 1) ? "vez" : "veces";
+
+            // Mostramos la página de bienvenida
             resp.setContentType("text/html;charset=UTF-8");
             try (PrintWriter out = resp.getWriter()) {
-                resp.setContentType("text/html;charset=UTF-8");
                 out.println("<!DOCTYPE html>");
                 out.println("<html>");
                 out.println("<head>");
-                out.println("<title>Login" + cookieOptional.get() + "</title>");
+                out.println("<title>Hola " + usernameOptional.get() + "</title>");
+                // Enlazamos la hoja de estilos CSS
+                out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + req.getContextPath() + "/css/estilos.css\">");
                 out.println("</head>");
                 out.println("<body>");
-                out.println("<h1>Login</h1>");
-                out.println("Bienvenido al sistema " + cookieOptional.get() + " has iniciado sesion");
+                // Saludamos y mostramos el contador de la sesión
+                out.println("<h1>Bienvenido a mi aplicacion <span class=\"username\">" + usernameOptional.get() + "</span>. Has iniciado sesión " + counter + " " + veces + "!</h1>");
+                out.println("<p><a href='" + req.getContextPath() + "/logout'>Cerrar sesión</a></p>");
                 out.println("</body>");
                 out.println("</html>");
             }
         } else {
-            // No encontramos la cookie (Usuario no logueado)
-            // Redirigimos al JSP que contiene el formulario HTML.
-            // El usuario no ve cambiar la URL, solo ve el formulario.
+            // 2b. No hay sesión: El usuario no está logueado.
+            // Mostramos el formulario .jsp para que inicie sesión.
             getServletContext().getRequestDispatcher("/login.jsp").forward(req, resp);
         }
     }
 
     /*
-     * Metodo que maneja las solicitudes HTTP POST.
-     * Se activa cuando el usuario wnvia el formulario desde /login.jsp.
-     * Su objetivo es verificar las credenciales.
+     * Metodo POST: Maneja el envío del formulario de login.
+     * Su objetivo es validar las credenciales.
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        // 5. Obtener los parámetros (datos) enviados desde el formulario
+        // 1. Obtener los parámetros (datos) enviados desde el formulario
         String username = req.getParameter("user");
         String password = req.getParameter("password");
 
-        // 6. Lógica de validación
+        // 2. Lógica de validación
         if (username.equals(USERNAME) && password.equals(PASSWORD)) {
-            //Si son correctas(Login exitoso)
+            // 2a. Si son correctas (Login exitoso)
 
-            // Configuramos la respuesta
-            resp.setContentType("text/html;charset=UTF-8");
+            // 3. Crear la sesión y guardar el username
+            HttpSession session = req.getSession();
+            session.setAttribute("username", username);
 
-            // Creamos la cookie "username" con el valor del usuario logueado
-            Cookie cookie = new Cookie("username", username);
+            // 4. LÓGICA DEL CONTADOR
+            int counter = 0; // Inicia el contador en 0
 
-            // Añadimos la cookie a la respuesta. El navegador la guardará.
-            resp.addCookie(cookie);
+            // 5. Leer todas las cookies que envía el navegador
+            Cookie[] cookies = req.getCookies() != null ? req.getCookies() : new Cookie[0];
 
-            // Generamos una página de exito
-            try (PrintWriter out = resp.getWriter()) {
-                resp.setContentType("text/html;charset=UTF-8");
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<head>");
-                out.println("<title>Login correcto</title>");
-                // Enlazamos la hoja de estilos CSS
-                out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + req.getContextPath() + "/css/estilos.css\">");
-                out.println("</head>");
-                out.println("<body>");
-                // Usamos la clase CSS "username" para el estilo
-                out.println("<h1>Bienvenido a mi aplicacion <span class=\"username\">" + username + "</span> Sesion con exito!</h1>");
-                out.println("<a href='" + req.getContextPath() + "/index.html'>Volver al inicio</a>");
-                out.println("</body>");
-                out.println("</html>");
+            // 6. Buscar la cookie "loginCounter"
+            Optional<Cookie> cookieOptional = Arrays.stream(cookies)
+                    .filter(c -> "loginCounter".equals(c.getName()))
+                    .findAny();
+
+            // 7. Si la cookie existe, leemos su valor
+            if (cookieOptional.isPresent()) {
+                try {
+                    // Convertimos el valor de la cookie (String) a un número (int)
+                    String counterStr = cookieOptional.get().getValue();
+                    counter = Integer.parseInt(counterStr);
+                } catch (NumberFormatException e) {
+                    // Si el valor no es un número, lo reseteamos a 0
+                    counter = 0;
+                }
             }
 
-            // 7. Redirigir al usuario al index
-            // Esta línea es la que realmente ve el usuario.
-            // Un sendRedirect() le dice al navegador "Ve a esta otra página".
-            // Esto anula el HTML que se escribió en el 'try-with-resources' de arriba.
-            resp.sendRedirect(req.getContextPath() + "/index.html");
+            // 8. Incrementamos el contador (sea 0 o el valor que traía)
+            counter++;
+
+            // 9. Creamos la nueva cookie (o la actualizamos) con el valor incrementado
+            Cookie loginCookie = new Cookie("loginCounter", Integer.toString(counter));
+            loginCookie.setMaxAge(60 * 60 * 24 * 365); // Hacemos que dure 1 año
+            resp.addCookie(loginCookie); // La enviamos al navegador
+
+            // 10. Guardamos el contador en la SESIÓN SÓLO para esta sesión actual
+            // (Así el 'doGet' puede leerlo fácilmente sin procesar cookies)
+            session.setAttribute("sessionCounter", counter);
+
+            // 11. Redirigimos a la página de bienvenida (donde está el 'doGet')
+            resp.sendRedirect(req.getContextPath() + "/login.html");
 
         } else {
-            //Si no son correctas (Login fallido)
-            // Enviamos un error HTTP 401 (No Autorizado) con un mensaje.
+            // 2b. Si no son correctas (Login fallido)
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Lo sentimos no tiene acceso o revise las credenciales");
         }
     }

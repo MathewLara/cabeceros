@@ -10,22 +10,28 @@
 <html>
 <head>
     <title>Inicio de sesion</title>
-    <div>
-        <form action ="/cabeceros/login" method="post">
-            <div>
-                <label for ="user">Ingrese el usuario</label>
-                <input type ="text" id ="user" name="user">
-            </div>
-            <div>
-                <label for ="password">Ingrese el password</label>
-                <input type ="password" id ="password" name="password">
-            </div>
-            <div>
-                <input type="submit" value="Entrar">
-            </div>
-        </form>
-    </div>
+
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/estilos.css">
+
 </head>
 <body>
+
+<div class="login-container">
+    <form action ="/manejodecookies/login" method="post">
+        <div>
+            <label for ="user">Ingrese el usuario</label>
+            <input type ="text" id ="user" name="user">
+        </div>
+
+        <div>
+            <label for ="password">Ingrese el password</label>
+            <input type ="password" id ="password" name="password">
+        </div>
+        <div>
+            <input type="submit" value="Entrar">
+        </div>
+    </form>
+</div>
+
 </body>
 </html>
